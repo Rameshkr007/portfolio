@@ -108,7 +108,9 @@ QUICK ANSWERS:
 let genAI = null;
 const getGenAI = () => {
   if (!genAI) {
-    if (!process.env.GEMINI_API_KEY) throw new Error('GEMINI_API_KEY not set');
+    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
+      throw new Error('GEMINI_API_KEY not set');
+    }
     genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   }
   return genAI;
@@ -128,29 +130,43 @@ exports.chat = async (req, res) => {
     }
 
     const ai = getGenAI();
-    const model = ai.getGenerativeModel({
-      model: 'gemini-1.5-flash',
-      systemInstruction: PORTFOLIO_CONTEXT,
-    });
+    const modelsToTry = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-latest'];
+    let lastError = null;
+    let reply = null;
 
-    // Build chat history (max last 6 turns)
     const recent = history.slice(-6);
-    const chat = model.startChat({
-      history: recent.map(h => ({
-        role: h.role,
-        parts: [{ text: h.text }],
-      })),
-    });
+    const formattedHistory = recent.map(h => ({
+      role: h.role,
+      parts: [{ text: h.text }],
+    }));
 
-    const result = await chat.sendMessage(message.trim());
-    const reply  = result.response.text();
+    for (const modelName of modelsToTry) {
+      try {
+        const model = ai.getGenerativeModel({
+          model: modelName,
+          systemInstruction: PORTFOLIO_CONTEXT,
+        });
+
+        const chat = model.startChat({ history: formattedHistory });
+        const result = await chat.sendMessage(message.trim());
+        reply = result.response.text();
+        if (reply) break;
+      } catch (err) {
+        lastError = err;
+        console.warn(`[AI Chat Warning] Model ${modelName} failed: ${err.message}. Trying next fallback...`);
+      }
+    }
+
+    if (!reply) {
+      throw lastError || new Error('All Gemini model attempts failed.');
+    }
 
     return res.status(200).json({ success: true, reply });
   } catch (err) {
     console.error('[AI Chat Error]', err.message);
     if (err.message?.includes('GEMINI_API_KEY')) {
-      return res.status(503).json({ success: false, message: 'AI service not configured. Please contact Ramesh directly at rameshkrthakur1816@gmail.com' });
+      return res.status(503).json({ success: false, message: 'AI service not configured. Please add GEMINI_API_KEY in server/.env' });
     }
-    return res.status(500).json({ success: false, message: 'AI assistant is temporarily unavailable. Please try again.' });
+    return res.status(500).json({ success: false, message: 'AI assistant is temporarily unavailable.' });
   }
 };
