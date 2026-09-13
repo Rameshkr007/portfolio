@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Bot, User, Sparkles, RefreshCw, ChevronDown } from 'lucide-react';
+import api from '../services/api';
 
 /* ─── Quick suggestion chips ─────────────────────────────────── */
 const SUGGESTIONS = [
@@ -137,12 +138,12 @@ export default function AIAssistant() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: msg, history: historyRef.current }),
+      // ✅ Fixed API call using centralized api service
+      const response = await api.post('/ai/chat', {
+        message: msg,
+        history: historyRef.current,
       });
-      const data = await res.json();
+      const data = response.data;
       const reply = data.success ? data.reply : (data.message || 'Sorry, something went wrong. Please try again!');
 
       // Update history
