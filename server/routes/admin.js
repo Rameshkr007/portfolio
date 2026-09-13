@@ -1,0 +1,11 @@
+const express = require('express');
+const { protect } = require('../middleware/auth');
+const { getMessages, getMessage, updateMessageStatus, deleteMessage, getAnalytics } = require('../controllers/adminController');
+const router = express.Router();
+router.use(protect);
+router.get('/messages', getMessages);
+router.get('/messages/:id', getMessage);
+router.put('/messages/:id/status', updateMessageStatus);
+router.delete('/messages/:id', deleteMessage);
+router.get('/analytics', getAnalytics);
+module.exports = router;
