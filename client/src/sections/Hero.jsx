@@ -441,7 +441,7 @@ export default function Hero() {
 
       {/* ── Main container ── */}
       <div style={S.container}>
-        <div style={S.grid}>
+        <div style={S.grid} className="hero-grid">
 
           {/* ════════ LEFT COLUMN ════════ */}
           <div>
