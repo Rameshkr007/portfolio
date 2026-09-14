@@ -20,10 +20,9 @@ exports.submitContact = async (req, res) => {
     await Analytics.create({ event: 'contact_form_submitted', metadata: { subject }, ipAddress: req.ip || '' });
 
     // Send email via HTTPS Web3Forms (bypasses Render SMTP port blocking)
-    const apiKey = process.env.WEB3FORMS_KEY || 'fae61cb6-5fa4-4fef-a678-bf5b9f9e31d4';
     try {
       await axios.post('https://api.web3forms.com/submit', {
-        access_key: apiKey,
+        access_key: process.env.WEB3FORMS_KEY || 'fae61cb6-5fa4-4fef-a678-bf5b9f9e31d4',
         name: name,
         email: email,
         subject: `[Portfolio Contact] ${subject}`,
