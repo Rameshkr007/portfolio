@@ -1,6 +1,6 @@
+const axios = require('axios');
 const { validationResult } = require('express-validator');
 const ContactMessage = require('../models/ContactMessage');
-const { sendNotificationEmail, sendAcknowledgementEmail } = require('../utils/sendEmail');
 const Analytics = require('../models/Analytics');
 
 exports.submitContact = async (req, res) => {
@@ -10,16 +10,30 @@ exports.submitContact = async (req, res) => {
       return res.status(400).json({ success: false, errors: errors.array() });
     }
     const { name, email, company, phone, subject, message } = req.body;
+    
+    // Save to MongoDB
     const contactMessage = new ContactMessage({
       name, email, company: company || '', phone: phone || '', subject, message,
       ipAddress: req.ip || '', userAgent: req.headers['user-agent'] || '',
     });
     await contactMessage.save();
     await Analytics.create({ event: 'contact_form_submitted', metadata: { subject }, ipAddress: req.ip || '' });
-    Promise.all([
-      sendNotificationEmail({ name, email, company, subject, message }).catch(err => console.error('Notification email failed:', err)),
-      sendAcknowledgementEmail({ name, email, subject }).catch(err => console.error('Ack email failed:', err)),
-    ]);
+
+    // Send email via HTTPS Web3Forms (bypasses Render SMTP port blocking)
+    const apiKey = process.env.WEB3FORMS_KEY || 'fae61cb6-5fa4-4fef-a678-bf5b9f9e31d4';
+    try {
+      await axios.post('https://api.web3forms.com/submit', {
+        access_key: apiKey,
+        name: name,
+        email: email,
+        subject: `[Portfolio Contact] ${subject}`,
+        message: `From: ${name} (${email})\nCompany: ${company || 'N/A'}\n\nMessage:\n${message}`,
+        from_name: 'Portfolio Contact Form'
+      });
+    } catch (eErr) {
+      console.warn('Web3Forms notification error:', eErr.message);
+    }
+
     return res.status(201).json({ success: true, message: 'Message received! I will get back to you soon.' });
   } catch (error) {
     console.error('Contact submission error:', error);
