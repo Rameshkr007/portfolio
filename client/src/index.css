@@ -646,9 +646,6 @@ ul, ol { list-style: none; }
   align-items: start;
 }
 
-.about-left { }
-.about-right { }
-
 .about-philosophy {
   margin-top: 32px;
 }
@@ -1525,7 +1522,6 @@ ul, ol { list-style: none; }
   align-items: start;
 }
 
-.contact-info { }
 .contact-info-item {
   display: flex;
   align-items: flex-start;
@@ -2162,8 +2158,9 @@ ul, ol { list-style: none; }
     gap: 48px !important;
   }
 }
+
 /* ================================================================
-   MOBILE RESPONSIVE ENHANCEMENTS
+   MOBILE RESPONSIVE ENHANCEMENTS & OVERFLOW PREVENT
 ================================================================ */
 html, body {
   overflow-x: hidden !important;
