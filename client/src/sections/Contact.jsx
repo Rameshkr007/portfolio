@@ -39,22 +39,40 @@ export default function Contact() {
     setStatus({ state: 'loading', message: '' });
     
     try {
-      // Mock API call if submitContactForm isn't fully implemented
-      if(typeof submitContactForm === 'function') {
+      // 1. Save to MongoDB database & Admin Dashboard via backend API
+      if (typeof submitContactForm === 'function') {
         await submitContactForm(formData);
-      } else {
-        await new Promise(resolve => setTimeout(resolve, 1500));
+      }
+
+      // 2. Direct Email Delivery from Browser to Gmail via Web3Forms (bypasses Cloudflare & Render SMTP blocking)
+      const web3Key = import.meta.env.VITE_WEB3FORMS_KEY || 'fae61cb6-5fa4-4fef-a678-bf5b9f9e31d4';
+      try {
+        await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            access_key: web3Key,
+            name: formData.name,
+            email: formData.email,
+            subject: `[Portfolio Contact] ${formData.subject}`,
+            message: `From: ${formData.name} (${formData.email})\nCompany: ${formData.company || 'N/A'}\nPhone: ${formData.phone || 'N/A'}\n\nMessage:\n${formData.message}`,
+            from_name: 'Portfolio Contact Form'
+          })
+        });
+      } catch (eErr) {
+        console.warn('Web3Forms email delivery notice:', eErr);
       }
       
       trackEvent('contact_form_submit');
       setStatus({ state: 'success', message: 'Message sent successfully! I will get back to you soon.' });
-      setFormData({ name: '', email: '', company: '', subject: '', message: '' });
+      setFormData({ name: '', email: '', company: '', phone: '', subject: '', message: '' });
       
       setTimeout(() => setStatus({ state: 'idle', message: '' }), 5000);
     } catch (err) {
       setStatus({ state: 'error', message: 'Failed to send message. Please try again later.' });
     }
   };
+
 
   return (
     <section id="contact" className="section">
