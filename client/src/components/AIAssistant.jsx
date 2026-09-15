@@ -5,15 +5,15 @@ import api from '../services/api';
 
 /* ─── Quick suggestion chips ─────────────────────────────────── */
 const SUGGESTIONS = [
-  'Tell me about Smart Study Hub',
-  'What technologies does Ramesh use?',
-  'What is his educational background?',
-  'Tell me about CampusPath project',
-  'Is Ramesh open to work?',
-  'What certifications does he have?',
-  'Tell me about TaskFlow API',
-  'How can I contact Ramesh?',
+  "What is Ramesh's educational background?",
+  "Tell me about Smart Study Hub project",
+  "Which tech field has the best scope?",
+  "Full-Stack Developer learning roadmap",
+  "AI & Machine Learning roadmap",
+  "What technologies does Ramesh use?",
+  "How can I contact Ramesh?",
 ];
+
 
 /* ─── Markdown-lite renderer ─────────────────────────────────── */
 function renderText(text) {
@@ -138,7 +138,6 @@ export default function AIAssistant() {
     setLoading(true);
 
     try {
-      // ✅ Fixed API call using centralized api service
       const response = await api.post('/ai/chat', {
         message: msg,
         history: historyRef.current,
@@ -182,8 +181,8 @@ export default function AIAssistant() {
   /* ── Styles ── */
   const S = {
     fab: {
-      position: 'fixed', bottom: 28, right: 28, zIndex: 1100,
-      width: 60, height: 60, borderRadius: 18,
+      position: 'fixed', bottom: 20, right: 20, zIndex: 1100,
+      width: 56, height: 56, borderRadius: 16,
       background: 'linear-gradient(135deg,#3b82f6,#8b5cf6)',
       border: 'none', cursor: 'pointer', color: 'white',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -192,7 +191,7 @@ export default function AIAssistant() {
       fontFamily: 'inherit',
     },
     fabHint: {
-      position: 'fixed', bottom: 96, right: 28, zIndex: 1099,
+      position: 'fixed', bottom: 84, right: 20, zIndex: 1099,
       padding: '8px 14px', borderRadius: 12,
       background: 'rgba(8,12,24,.95)',
       border: '1px solid rgba(59,130,246,.4)',
@@ -208,7 +207,7 @@ export default function AIAssistant() {
       borderRadius: 22,
       background: 'rgba(8,12,24,.97)',
       border: '1px solid rgba(59,130,246,.25)',
-      boxShadow: '0 30px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.04)',
+      boxShadow: '0 30px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.04), 0 0 80px rgba(59,130,246,.08)',
       backdropFilter: 'blur(30px)',
       display: 'flex', flexDirection: 'column',
       overflow: 'hidden', fontFamily: "'Inter', system-ui, sans-serif",
