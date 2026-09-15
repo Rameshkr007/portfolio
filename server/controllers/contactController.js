@@ -1,4 +1,5 @@
-const axios = require('axios');
+let axios;
+try { axios = require('axios'); } catch (e) { axios = null; }
 const { validationResult } = require('express-validator');
 const ContactMessage = require('../models/ContactMessage');
 const Analytics = require('../models/Analytics');
@@ -20,15 +21,26 @@ exports.submitContact = async (req, res) => {
     await Analytics.create({ event: 'contact_form_submitted', metadata: { subject }, ipAddress: req.ip || '' });
 
     // Send email via HTTPS Web3Forms (bypasses Render SMTP port blocking)
+    const apiKey = process.env.WEB3FORMS_KEY || 'fae61cb6-5fa4-4fef-a678-bf5b9f9e31d4';
+    const payload = {
+      access_key: apiKey,
+      name: name,
+      email: email,
+      subject: `[Portfolio Contact] ${subject}`,
+      message: `From: ${name} (${email})\nCompany: ${company || 'N/A'}\n\nMessage:\n${message}`,
+      from_name: 'Portfolio Contact Form'
+    };
+
     try {
-      await axios.post('https://api.web3forms.com/submit', {
-        access_key: process.env.WEB3FORMS_KEY || 'fae61cb6-5fa4-4fef-a678-bf5b9f9e31d4',
-        name: name,
-        email: email,
-        subject: `[Portfolio Contact] ${subject}`,
-        message: `From: ${name} (${email})\nCompany: ${company || 'N/A'}\n\nMessage:\n${message}`,
-        from_name: 'Portfolio Contact Form'
-      });
+      if (axios) {
+        await axios.post('https://api.web3forms.com/submit', payload);
+      } else if (typeof fetch !== 'undefined') {
+        await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
     } catch (eErr) {
       console.warn('Web3Forms notification error:', eErr.message);
     }
@@ -39,3 +51,4 @@ exports.submitContact = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Something went wrong. Please try again.' });
   }
 };
+
