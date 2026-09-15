@@ -107,8 +107,8 @@ QUICK ANSWERS:
 // ─── Controller ──────────────────────────────────────────────────────────────
 let genAI = null;
 const getGenAI = () => {
-    
-  if (!genAI) {if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
+  if (!genAI) {
+    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
       throw new Error('GEMINI_API_KEY not set');
     }
     genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
