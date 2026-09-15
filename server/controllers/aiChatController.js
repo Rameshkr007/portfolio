@@ -107,8 +107,8 @@ QUICK ANSWERS:
 // ─── Controller ──────────────────────────────────────────────────────────────
 let genAI = null;
 const getGenAI = () => {
-  if (!genAI) {
-    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
+    
+  if (!genAI) {if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
       throw new Error('GEMINI_API_KEY not set');
     }
     genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -130,7 +130,7 @@ exports.chat = async (req, res) => {
     }
 
     const ai = getGenAI();
-    const modelsToTry = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-latest'];
+    const modelsToTry = ['gemini-3.6-flash', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-1.5-flash-latest'];
     let lastError = null;
     let reply = null;
 
@@ -153,7 +153,7 @@ exports.chat = async (req, res) => {
         if (reply) break;
       } catch (err) {
         lastError = err;
-        console.warn(`[AI Chat Warning] Model ${modelName} failed: ${err.message}. Trying next fallback...`);
+        console.warn(`[AI Chat Warning] Model ${modelName} failed: ${err.message}. Trying fallback...`);
       }
     }
 
